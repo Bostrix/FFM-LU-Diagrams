@@ -1,0 +1,211 @@
+@startuml
+title MATLAB Project Sequence Diagram
+
+actor User
+
+participant wrapper.m
+participant Model01_combine_meshes.m
+participant Tissue_index_read
+participant meshlaplace3D
+participant MATLAB functions
+participant meshreorient
+participant meshareas
+participant assign_initial_conductivities
+participant clean_coincident_facets
+participant fix_meshes
+participant pad_neighbour_triangles
+participant Model02_observation_surface_generator
+participant mesh_surcreator
+participant meshtricenter
+participant tri
+participant simpqual
+participant meshnormals
+participant Model03_defineplanes
+participant mt
+participant bem2_graphics_base
+participant meshconnee
+participant meshplaneinitXY
+participant meshplaneinitXZ
+participant meshplaneinitYZ
+participant Model04_planeXY
+participant Model04_planeXZ
+participant Model04_planeYZ
+participant Model05_nintegral_generator
+participant meshneighborints
+participant meshneighborintspoints
+participant potint2
+participant potint
+participant Model06_fmm_lu_generator
+participant startup
+participant genpath_ex
+participant get_factorization
+
+
+User -> wrapper.m: Start process
+wrapper.m -> Model01_combine_meshes.m: Combine meshes
+
+Model01_combine_meshes.m -> Tissue_index_read: Read tissue index
+rbox over Model01_combine_meshes.m:0.013s
+Tissue_index_read --> Model01_combine_meshes.m: Return control
+
+Model01_combine_meshes.m -> meshlaplace3D: Apply Laplacian smoothing
+meshlaplace3D -> MATLAB functions: unique
+rbox over meshlaplace3D:0.372s
+rbox over Model01_combine_meshes.m:1.423s
+MATLAB functions --> meshlaplace3D: Return control
+meshlaplace3D --> Model01_combine_meshes.m: Return control
+
+Model01_combine_meshes.m -> meshreorient: Reorient mesh
+rbox over Model01_combine_meshes.m:2.347s
+meshreorient --> Model01_combine_meshes.m: Return control
+
+Model01_combine_meshes.m -> meshareas: Compute mesh areas
+rbox over wrapper.m:11:00:46s
+rbox over Model01_combine_meshes.m:0.123s
+meshareas --> Model01_combine_meshes.m: Return control
+
+Model01_combine_meshes.m -> assign_initial_conductivities: Assign conductivities
+rbox over Model01_combine_meshes.m:0.045s
+assign_initial_conductivities --> Model01_combine_meshes.m: Return control
+
+Model01_combine_meshes.m -> clean_coincident_facets: Clean coincident facets
+note right of clean_coincident_facets:identifying and resolving coincident \nfacets in the mesh.
+clean_coincident_facets -> MATLAB functions: knnsearch
+rbox over clean_coincident_facets:2.743s
+MATLAB functions --> clean_coincident_facets: Return control
+clean_coincident_facets -> fix_meshes: Fix mesh issues
+rbox over Model01_combine_meshes.m:2.999s
+rbox over clean_coincident_facets:0.249s
+note right of fix_meshes:fix_meshes:enhance the integrity, accuracy,\nand usability of the mesh data for subsequent\ncomputational tasks
+fix_meshes -> MATLAB functions: unique
+
+MATLAB functions --> fix_meshes: Return control
+fix_meshes --> clean_coincident_facets: Return control
+clean_coincident_facets --> Model01_combine_meshes.m: Return control
+
+Model01_combine_meshes.m -> pad_neighbour_triangles: Pad neighbor triangles
+note right of pad_neighbour_triangles:pad_neighbour_triangles:adding additional\ntriangles around the boundary of neighboring\ntriangles in the mesh.
+rbox over Model01_combine_meshes.m:0.006s
+pad_neighbour_triangles --> Model01_combine_meshes.m: Return control
+
+Model01_combine_meshes.m --> wrapper.m: Return control
+
+wrapper.m -> Model02_observation_surface_generator: Generate observation surface
+Model02_observation_surface_generator -> mesh_surcreator: Create surface mesh
+
+mesh_surcreator -> meshtricenter:Compute triangle centers
+rbox over mesh_surcreator:0.012s
+meshtricenter --> mesh_surcreator: Return control
+mesh_surcreator -> meshtricenter:Compute triangle centers again
+rbox over mesh_surcreator:0.013s
+meshtricenter --> mesh_surcreator: Return control
+
+mesh_surcreator -> tri: Triangle data operations
+rbox over mesh_surcreator:0.001s
+tri --> mesh_surcreator: return control
+mesh_surcreator -> MATLAB functions: knnsearch
+rbox over mesh_surcreator:11.390s
+MATLAB functions --> mesh_surcreator: Return control
+mesh_surcreator --> Model02_observation_surface_generator: Return control
+
+Model02_observation_surface_generator -> simpqual: Compute simplex quality
+rbox over wrapper.m:13.234s
+note right of simpqual:simpqual:computes the quality\nmetrics for simplices in the mesh
+rbox over Model02_observation_surface_generator: 0.033s
+simpqual --> Model02_observation_surface_generator: Return control
+
+Model02_observation_surface_generator -> meshnormals: Compute mesh normals
+rbox over Model02_observation_surface_generator:0.028s
+meshnormals --> Model02_observation_surface_generator: Return control
+
+Model02_observation_surface_generator -> meshlaplace3D: Apply Laplacian smoothing
+rbox over Model02_observation_surface_generator:0.371s
+meshlaplace3D --> Model02_observation_surface_generator: Return control
+
+Model02_observation_surface_generator --> wrapper.m: Return control
+
+wrapper.m -> Model03_defineplanes: Define planes
+
+loop for mt function
+Model03_defineplanes -> mt: Mesh transformation
+mt -> MATLAB functions: unique
+rbox over Model03_defineplanes:0.054s
+MATLAB functions --> mt: Return control
+mt --> Model03_defineplanes: Return control
+end
+
+Model03_defineplanes -> bem2_graphics_base: BEM graphics base
+bem2_graphics_base -> meshconnee: Mesh connectivity
+rbox over Model03_defineplanes:0.131s
+rbox over bem2_graphics_base:0.107s
+meshconnee --> bem2_graphics_base: Return control
+bem2_graphics_base --> Model03_defineplanes: Return control
+Model03_defineplanes ->MATLAB functions:axis
+rbox over wrapper.m:1.037s
+rbox over Model03_defineplanes:0.044s
+MATLAB functions --> Model03_defineplanes:return control
+
+loop for XY plane
+Model03_defineplanes -> meshplaneinitXY: Initialize XY plane
+rbox over Model03_defineplanes:0.093s
+meshplaneinitXY --> Model03_defineplanes: Return control
+end
+loop for XZ plane
+Model03_defineplanes -> meshplaneinitXZ: Initialize XZ plane
+rbox over Model03_defineplanes:0.073s
+meshplaneinitXZ --> Model03_defineplanes: Return control
+end 
+loop for YZ plane
+Model03_defineplanes -> meshplaneinitYZ: Initialize YZ plane
+rbox over Model03_defineplanes:0.072s
+meshplaneinitYZ --> Model03_defineplanes: Return control
+end
+Model03_defineplanes --> wrapper.m: Return control
+
+wrapper.m -> Model04_planeXY: Handle XY plane
+rbox over wrapper.m:0.011s
+Model04_planeXY --> wrapper.m: Return control
+
+wrapper.m -> Model04_planeXZ: Handle XZ plane
+rbox over wrapper.m:0.004s
+Model04_planeXZ --> wrapper.m: Return control
+
+wrapper.m -> Model04_planeYZ: Handle YZ plane
+rbox over wrapper.m:0.005s
+Model04_planeYZ --> wrapper.m: Return control
+
+wrapper.m -> Model05_nintegral_generator: Generate numerical integrals
+Model05_nintegral_generator -> MATLAB functions: parpool
+rbox over Model05_nintegral_generator:15.460s
+MATLAB functions --> Model05_nintegral_generator:return control
+Model05_nintegral_generator -> MATLAB functions: knnsearch
+rbox over Model05_nintegral_generator:1.874s
+MATLAB functions --> Model05_nintegral_generator:return control
+
+Model05_nintegral_generator -> meshneighborints: Call meshneighborints
+meshneighborints -> tri: Call tri function
+rbox over meshneighborints:0.007s
+rbox over Model05_nintegral_generator:267.793s
+tri --> meshneighborints: Return control
+meshneighborints --> Model05_nintegral_generator: Return control
+rbox over wrapper.m:384.147s
+Model05_nintegral_generator -> MATLAB functions: knnsearch
+rbox over Model05_nintegral_generator:16.412s
+MATLAB functions --> Model05_nintegral_generator:return control
+Model05_nintegral_generator -> meshneighborintspoints: Call meshneighborintspoints
+meshneighborintspoints -> potint2: Call potint2
+potint2 --> meshneighborintspoints: Return control
+meshneighborintspoints -> potint: Call potint
+potint --> meshneighborintspoints: Return control
+meshneighborintspoints --> Model05_nintegral_generator: Return control
+Model05_nintegral_generator --> wrapper.m: Return control
+wrapper.m -> Model06_fmm_lu_generator: FMM LU Generator
+Model06_fmm_lu_generator -> startup :setting up environment
+startup -> genpath_ex :excluding directories
+genpath_ex-->startup:return control
+startup --> Model06_fmm_lu_generator : return control
+Model06_fmm_lu_generator ->get_factorization :performs a factorization operation on a matrix
+get_factorization -->Model06_fmm_lu_generator:return control
+Model06_fmm_lu_generator --> wrapper.m: Return control
+
+@enduml
